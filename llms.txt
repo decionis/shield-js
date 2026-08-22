@@ -1,0 +1,43 @@
+# Decionis Shield
+
+Shield is consumer spending authority for apps and AI agents.
+
+Developer proposition: Let your app or AI agent ask the user's Shield before spending their money.
+
+Core flow: request spending authority → Shield evaluates user permission → ALLOW / ASK / BLOCK → execute only after ALLOW.
+
+## Start
+
+- TypeScript: `npm install @decionis/shield` (release candidate; not yet published)
+- Sandbox CLI: `npx @decionis/shield-demo --all` (release candidate; not yet published)
+- Swift: add the `ShieldKit` Swift package from the public mirror after publication
+- REST contract: `openapi/shield-api.yaml`
+- Quickstart: `docs/developers/quickstart.md`
+
+## Request
+
+Required: `amount`, `currency`, `purpose`.
+
+Optional: `merchant`, `category`, `agentId`, `transactionType`, `metadata`.
+
+## Response
+
+- `ALLOW`: execute this exact action once and preserve `decisionId`.
+- `ASK`: hold, request approval, and execute only after a later `ALLOW`.
+- `BLOCK`: stop.
+- Error: hold. An error is never permission.
+
+## Environments
+
+- `sandbox`: deterministic simulation, no real money, evidence class `sandbox_fixture`.
+- `production`: registered identity and server-side integration credential required.
+
+## Product hierarchy
+
+- Enterprise execution authority: Decionis Protocol.
+- Human approval: Presence.
+- Consumer, app, and agent spending authority: Shield.
+
+## Safety boundary
+
+Applications must request Shield authorization before executing the consequential action. Shield does not universally intercept arbitrary card or bank transactions.

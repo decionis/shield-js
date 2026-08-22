@@ -1,0 +1,74 @@
+# Decionis Shield — Full Developer Context
+
+Shield lets applications and AI agents ask a consumer for spending authority before money-moving execution. The default developer vocabulary is ALLOW / ASK / BLOCK. Protocol internals, policy graphs, signatures, Presence orchestration, and dossier plumbing are available as advanced metadata but are not prerequisites for first success.
+
+## Canonical files
+
+- `docs/developers/quickstart.md` — five-minute TypeScript, Swift, CLI, and REST start.
+- `docs/developers/architecture.md` — product hierarchy and enforcement boundary.
+- `docs/developers/sandbox.md` — deterministic fixtures.
+- `docs/developers/errors.md` — stable fail-closed errors.
+- `docs/developers/production-readiness.md` — identity, credentials, and execution invariants.
+- `docs/developers/mcp.md` — five consumer-facing MCP tools.
+- `docs/developers/works-with-shield.md` — compatibility standard and badge rules.
+- `docs/developers/metrics.md` — activation funnel and north-star metric.
+- `openapi/shield-api.yaml` — REST API.
+- `contracts/shield-authorize.schema.json` — request schema.
+- `contracts/shield-decision.schema.json` — response schema.
+- `contracts/shield-mcp-tools.json` — MCP inventory.
+
+## TypeScript
+
+```ts
+import { ShieldClient } from "@decionis/shield";
+
+const shield = new ShieldClient();
+const decision = await shield.authorize({
+  amount: 89,
+  currency: "USD",
+  purpose: "Book hotel",
+  merchant: "Hilton"
+});
+
+if (decision.verdict === "ALLOW") await execute();
+if (decision.verdict === "ASK") {
+  const final = await shield.requestApproval(decision.decisionId);
+  if (final.verdict === "ALLOW") await execute();
+}
+```
+
+## Swift
+
+```swift
+import ShieldKit
+
+let shield = ShieldClient()
+let decision = try await shield.authorize(
+    amount: 89,
+    currency: "USD",
+    purpose: "Book hotel",
+    merchant: "Hilton"
+)
+
+switch decision.verdict {
+case .allowed: execute()
+case .approvalRequired: _ = try await shield.requestApproval(decisionId: decision.decisionId)
+case .blocked: cancel()
+}
+```
+
+## Authentication
+
+Sandbox requires no credential. Production requires `DECIONIS_SHIELD_ENV=production`, a server-side `DECIONIS_SHIELD_API_KEY`, and a registered `app_id`. Do not embed production API keys in browser or mobile code.
+
+## Sandbox scenarios
+
+`normal-purchase`, `purchase-above-limit`, `subscription-below-threshold`, `subscription-price-increase`, `unknown-autonomous-agent`, `agent-weekly-allowance-exceeded`, `expired-spending-permission`, `travel-approval`, `travel-allowance-exceeded`.
+
+## MCP
+
+Use `shield.request_purchase`, `shield.check_spending_authority`, `shield.get_permission`, `shield.request_approval`, and `shield.get_decision`. These should be aliases inside the existing Decionis MCP runtime, not a separate server.
+
+## Production constraints
+
+An ALLOW applies only to the exact action evaluated and must be consumed once at a real enforcement point. ASK, BLOCK, sandbox responses, old decisions, dossiers alone, completed Presence checks, network failures, and malformed responses do not authorize execution.

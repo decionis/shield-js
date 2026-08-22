@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://decionis.com/schemas/shield/authorize-v1.json",
+  "title": "Shield spending authorization",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["amount", "currency", "purpose"],
+  "properties": {
+    "amount": { "type": "number", "exclusiveMinimum": 0 },
+    "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+    "purpose": { "type": "string", "minLength": 3, "maxLength": 240 },
+    "merchant": { "type": "string", "minLength": 1, "maxLength": 160 },
+    "category": { "type": "string", "minLength": 1, "maxLength": 80 },
+    "agentId": { "type": "string", "minLength": 1, "maxLength": 120 },
+    "transactionType": {
+      "type": "string",
+      "enum": ["PURCHASE", "SUBSCRIPTION", "RENEWAL", "TRANSFER", "REFUND", "OTHER"]
+    },
+    "metadata": { "type": "object", "additionalProperties": true }
+  }
+}

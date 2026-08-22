@@ -1,0 +1,40 @@
+{
+  "name": "shield-compat",
+  "version": "0.1.0",
+  "description": "Verify that an application respects Decionis Shield ALLOW, ASK, and BLOCK decisions before spending.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "files": ["dist", "README.md", "LICENSE"],
+  "bin": {
+    "shield-compat": "./dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build --silent && node --test test/*.test.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@decionis/shield": "0.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.7.2"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/decionis/shield-js.git",
+    "directory": "packages/shield-compat"
+  },
+  "homepage": "https://decionis.com/shield/developers"
+}

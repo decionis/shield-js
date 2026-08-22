@@ -1,0 +1,282 @@
+openapi: 3.1.0
+info:
+  title: Decionis Shield Spending Authority API
+  version: 0.1.0
+  license:
+    name: Apache-2.0
+    identifier: Apache-2.0
+  description: |
+    Ask a user's Shield for authority before an application or AI agent spends money.
+
+    Applications MUST request authorization before executing the consequential action.
+    ALLOW authorizes only the exact request evaluated. ASK means hold until approval is
+    complete. BLOCK means do not execute. A transport or API error is never permission.
+
+    Sandbox responses are simulations labelled `sandbox_fixture` and cannot move money.
+servers:
+  - url: https://api.decionis.com
+    description: Production (requires a registered Shield integration)
+tags:
+  - name: Authorization
+    description: Request, hold, and read consumer spending authority.
+  - name: Evidence
+    description: Retrieve the Decision Dossier behind a Shield verdict.
+paths:
+  /v1/shield/authorize:
+    post:
+      tags: [Authorization]
+      operationId: authorizeShieldSpending
+      summary: Request spending authority
+      description: Returns ALLOW, ASK, or BLOCK for one proposed spending action.
+      parameters:
+        - $ref: "#/components/parameters/AppIdHeader"
+        - $ref: "#/components/parameters/EnvironmentHeader"
+        - $ref: "#/components/parameters/IdempotencyHeader"
+      security:
+        - shieldApiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SpendingRequest"
+            examples:
+              hotel:
+                value:
+                  amount: 89
+                  currency: USD
+                  purpose: Book hotel
+                  merchant: Hilton
+                  category: travel
+                  agentId: travel-agent
+                  transactionType: PURCHASE
+      responses:
+        "200":
+          description: A spending decision. ASK and BLOCK are successful decisions, not HTTP errors.
+          headers:
+            X-Shield-Environment:
+              schema: { type: string, enum: [sandbox, production] }
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShieldDecision"
+        "400": { $ref: "#/components/responses/InvalidRequest" }
+        "401": { $ref: "#/components/responses/AuthenticationFailed" }
+        "409": { $ref: "#/components/responses/EnvironmentMismatch" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "503": { $ref: "#/components/responses/Unavailable" }
+  /v1/shield/decisions/{decisionId}:
+    get:
+      tags: [Authorization]
+      operationId: getShieldDecision
+      summary: Read the current state of a decision
+      parameters:
+        - $ref: "#/components/parameters/DecisionIdPath"
+        - $ref: "#/components/parameters/AppIdHeader"
+        - $ref: "#/components/parameters/EnvironmentHeader"
+      security:
+        - shieldApiKey: []
+      responses:
+        "200":
+          description: Current decision state.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ShieldDecision" }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /v1/shield/decisions/{decisionId}/approval:
+    post:
+      tags: [Authorization]
+      operationId: requestShieldApproval
+      summary: Start or resume human approval for an ASK decision
+      description: |
+        Orchestrates Presence when policy requires the user. The caller must keep the
+        consequential action on hold until this endpoint returns an ALLOW decision.
+      parameters:
+        - $ref: "#/components/parameters/DecisionIdPath"
+        - $ref: "#/components/parameters/AppIdHeader"
+        - $ref: "#/components/parameters/EnvironmentHeader"
+      security:
+        - shieldApiKey: []
+      responses:
+        "200":
+          description: Current approval decision. ASK remains a hold.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ShieldDecision" }
+        "409":
+          description: The decision does not support approval.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ShieldError" }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /v1/shield/dossiers/{dossierId}:
+    get:
+      tags: [Evidence]
+      operationId: getShieldDecisionDossier
+      summary: Retrieve the Decision Dossier behind a verdict
+      parameters:
+        - name: dossierId
+          in: path
+          required: true
+          schema: { type: string, pattern: "^dsr_[A-Za-z0-9_-]+$" }
+        - $ref: "#/components/parameters/AppIdHeader"
+        - $ref: "#/components/parameters/EnvironmentHeader"
+      security:
+        - shieldApiKey: []
+      responses:
+        "200":
+          description: Signed evidence and evaluation metadata.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ShieldDossier" }
+        "404": { $ref: "#/components/responses/NotFound" }
+components:
+  securitySchemes:
+    shieldApiKey:
+      type: http
+      scheme: bearer
+      bearerFormat: Shield API key
+  parameters:
+    AppIdHeader:
+      name: X-Shield-App-Id
+      in: header
+      required: true
+      description: Registered integration identity. The server resolves trusted display metadata.
+      schema: { type: string, minLength: 3, maxLength: 120 }
+    EnvironmentHeader:
+      name: X-Shield-Environment
+      in: header
+      required: true
+      schema: { type: string, enum: [sandbox, production] }
+    IdempotencyHeader:
+      name: Idempotency-Key
+      in: header
+      required: false
+      schema: { type: string, minLength: 8, maxLength: 180 }
+    DecisionIdPath:
+      name: decisionId
+      in: path
+      required: true
+      schema: { type: string, pattern: "^dec_[A-Za-z0-9_-]+$" }
+  schemas:
+    SpendingRequest:
+      type: object
+      additionalProperties: false
+      required: [amount, currency, purpose]
+      properties:
+        amount:
+          type: number
+          exclusiveMinimum: 0
+          description: Major currency units, for example 89.00 USD.
+        currency:
+          type: string
+          pattern: "^[A-Z]{3}$"
+          description: ISO 4217 currency code.
+        purpose:
+          type: string
+          minLength: 3
+          maxLength: 240
+          description: Clear user-facing reason for spending.
+        merchant: { type: string, minLength: 1, maxLength: 160 }
+        category: { type: string, minLength: 1, maxLength: 80 }
+        agentId:
+          type: string
+          minLength: 1
+          maxLength: 120
+          description: Stable identity for the agent acting inside the registered application.
+        transactionType:
+          type: string
+          enum: [PURCHASE, SUBSCRIPTION, RENEWAL, TRANSFER, REFUND, OTHER]
+          default: PURCHASE
+        metadata:
+          type: object
+          additionalProperties: true
+    ShieldDecision:
+      type: object
+      additionalProperties: false
+      required:
+        [verdict, allowed, approvalRequired, approvalStatus, reason, reasonCode, requestId, decisionId, dossierId, environment]
+      properties:
+        verdict: { type: string, enum: [ALLOW, ASK, BLOCK] }
+        allowed:
+          type: boolean
+          description: True only when verdict is ALLOW.
+        approvalRequired:
+          type: boolean
+          description: True only when verdict is ASK.
+        approvalStatus:
+          type: string
+          enum: [NOT_REQUIRED, PENDING, APPROVED, DENIED, EXPIRED]
+        reason: { type: string }
+        reasonCode: { type: string, pattern: "^[A-Z0-9_]+$" }
+        requestId: { type: string, pattern: "^shr_[A-Za-z0-9_-]+$" }
+        decisionId: { type: string, pattern: "^dec_[A-Za-z0-9_-]+$" }
+        dossierId: { type: string, pattern: "^dsr_[A-Za-z0-9_-]+$" }
+        environment: { type: string, enum: [sandbox, production] }
+        advanced:
+          type: object
+          additionalProperties: false
+          properties:
+            policyVersion: { type: string }
+            reasonCodes: { type: array, items: { type: string } }
+            evidenceHash: { type: string }
+            signatures: { type: object, additionalProperties: true }
+            evaluationMetadata: { type: object, additionalProperties: true }
+    ShieldDossier:
+      type: object
+      additionalProperties: true
+      required: [dossierId, decisionId, verdict, reasonCode, environment, evidenceClass]
+      properties:
+        dossierId: { type: string }
+        decisionId: { type: string }
+        verdict: { type: string, enum: [ALLOW, ASK, BLOCK] }
+        reasonCode: { type: string }
+        environment: { type: string, enum: [sandbox, production] }
+        evidenceClass: { type: string, enum: [sandbox_fixture, production] }
+        evidenceHash: { type: string }
+        signatures: { type: object, additionalProperties: true }
+        evaluation: { type: object, additionalProperties: true }
+    ShieldError:
+      type: object
+      additionalProperties: false
+      required: [code, message, safeToExecute, retryable, action]
+      properties:
+        code: { type: string, pattern: "^SHIELD_[A-Z0-9_]+$" }
+        message: { type: string }
+        safeToExecute: { type: boolean, const: false }
+        retryable: { type: boolean }
+        action: { type: string }
+        requestId: { type: string }
+  responses:
+    InvalidRequest:
+      description: The request is invalid. Do not execute.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ShieldError" }
+    AuthenticationFailed:
+      description: Integration authentication failed. Do not execute.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ShieldError" }
+    EnvironmentMismatch:
+      description: Sandbox and production configuration were mixed. Do not execute.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ShieldError" }
+    RateLimited:
+      description: Retry with backoff; do not execute while waiting.
+      headers:
+        Retry-After: { schema: { type: integer } }
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ShieldError" }
+    Unavailable:
+      description: Authorization unavailable. Hold the transaction.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ShieldError" }
+    NotFound:
+      description: Decision or dossier not found.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ShieldError" }

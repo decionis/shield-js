@@ -1,0 +1,26 @@
+{
+  "name": "decionis-shield-workspace",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Developer surfaces for Decionis Shield consumer spending authority.",
+  "workspaces": [
+    "packages/shield-js",
+    "packages/shield-demo",
+    "packages/shield-compat"
+  ],
+  "scripts": {
+    "build:developer": "npm run build --workspace @decionis/shield && npm run build --workspace @decionis/shield-demo && npm run build --workspace shield-compat",
+    "test": "npm run test:developer",
+    "test:contracts": "node --test test/contracts.test.mjs",
+    "test:developer": "npm run test:contracts && npm run test --workspace @decionis/shield && npm run test --workspace @decionis/shield-demo && npm run test --workspace shield-compat",
+    "shield:demo": "npm run build:developer --silent && node packages/shield-demo/dist/cli.js",
+    "shield:demo:all": "npm run build:developer --silent && node packages/shield-demo/dist/cli.js --all"
+  },
+  "devDependencies": {
+    "@types/node": "^24.7.2",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

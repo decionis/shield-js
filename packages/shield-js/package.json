@@ -1,0 +1,46 @@
+{
+  "name": "@decionis/shield",
+  "version": "0.1.0",
+  "description": "Ask a user's Decionis Shield for spending authority before your app or AI agent executes.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build --silent && node --test test/*.test.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/decionis/shield-js.git",
+    "directory": "packages/shield-js"
+  },
+  "homepage": "https://decionis.com/shield/developers",
+  "keywords": [
+    "ai-agent-spending",
+    "payment-authorization",
+    "spending-limits",
+    "human-in-the-loop",
+    "decionis",
+    "shield"
+  ]
+}

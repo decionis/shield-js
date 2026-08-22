@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Decionis Shield consumer MCP surface",
+  "version": "0.1.0",
+  "tools": [
+    {
+      "name": "shield.request_purchase",
+      "description": "Ask the user's Shield for ALLOW, ASK, or BLOCK before a purchase executes.",
+      "required": ["amount", "currency", "purpose"]
+    },
+    {
+      "name": "shield.check_spending_authority",
+      "description": "Preview authority for an amount and spender without executing the action.",
+      "required": ["amount", "currency", "purpose"]
+    },
+    {
+      "name": "shield.get_permission",
+      "description": "Read the user's permission for the calling registered app or agent.",
+      "required": []
+    },
+    {
+      "name": "shield.request_approval",
+      "description": "Start Presence approval for an ASK decision; the action remains on hold.",
+      "required": ["decisionId"]
+    },
+    {
+      "name": "shield.get_decision",
+      "description": "Read the current state and dossier reference for a prior decision.",
+      "required": ["decisionId"]
+    }
+  ],
+  "safety": {
+    "allow": "The agent may execute only the exact authorized action once.",
+    "ask": "The agent must hold and request approval.",
+    "block": "The agent must not execute.",
+    "error": "A tool or transport error is not permission to execute."
+  }
+}
