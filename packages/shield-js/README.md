@@ -8,7 +8,7 @@
 npm install @decionis/shield
 ```
 
-> Package status: release candidate in the Shield repository; npm publication is still pending.
+Published on npm as `@decionis/shield`.
 
 ## Thirty seconds to a decision
 
@@ -57,7 +57,7 @@ const decision = await shield.authorize(
 // ASK — hold until approval
 ```
 
-Run all scenarios with `npx @decionis/shield-demo --all` after publication, or `npm run shield:demo:all` from this repository.
+Run all scenarios with `npx @decionis/shield-demo --all`, or `npm run shield:demo:all` from this repository.
 
 ## Production
 

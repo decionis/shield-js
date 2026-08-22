@@ -1,10 +1,14 @@
 {
   "name": "shield-compat",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Verify that an application respects Decionis Shield ALLOW, ASK, and BLOCK decisions before spending.",
   "license": "Apache-2.0",
   "type": "module",
-  "files": ["dist", "README.md", "LICENSE"],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "bin": {
     "shield-compat": "./dist/cli.js"
   },
@@ -20,7 +24,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@decionis/shield": "0.1.0"
+    "@decionis/shield": "0.1.1"
   },
   "devDependencies": {
     "@types/node": "^24.7.2"

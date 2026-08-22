@@ -6,13 +6,9 @@ Receive ALLOW, ASK, and BLOCK locally without an account or real money.
 
 ## 1. Install
 
-The packages are currently release candidates in this repository. After registry publication:
-
 ```bash
 npm install @decionis/shield
 ```
-
-From this repository, run `npm install` once and import the workspace package exactly as shown below.
 
 ## 2. Request authority
 

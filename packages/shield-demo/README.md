@@ -9,7 +9,7 @@ npx @decionis/shield-demo --scenario subscription-price-increase
 npx @decionis/shield-demo serve --port 8787
 ```
 
-> Package status: release candidate in the Shield repository; npm publication is still pending.
+Published on npm as `@decionis/shield-demo`.
 
 The default output explains the requesting agent, proposed action, amount, user permission, ALLOW / ASK / BLOCK verdict, execution instruction, decision ID, and dossier ID. Every output states `Environment: SANDBOX` and `No real money can move.`
 
