@@ -6,7 +6,7 @@ Verify that an integration requests authority before spending and correctly resp
 npx shield-compat ./shield.compat.mjs
 ```
 
-The package is currently a release candidate and is not yet published.
+Published on npm as `shield-compat`.
 
 Create `shield.compat.mjs`:
 

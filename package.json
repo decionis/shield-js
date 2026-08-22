@@ -1,7 +1,7 @@
 {
   "name": "decionis-shield-workspace",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Developer surfaces for Decionis Shield consumer spending authority.",
   "workspaces": [
     "packages/shield-js",

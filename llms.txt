@@ -8,9 +8,9 @@ Core flow: request spending authority → Shield evaluates user permission → A
 
 ## Start
 
-- TypeScript: `npm install @decionis/shield` (release candidate; not yet published)
-- Sandbox CLI: `npx @decionis/shield-demo --all` (release candidate; not yet published)
-- Swift: add the `ShieldKit` Swift package from the public mirror after publication
+- TypeScript: `npm install @decionis/shield`
+- Sandbox CLI: `npx @decionis/shield-demo --all`
+- Swift: add the `ShieldKit` Swift package from `https://github.com/decionis/shield-swift`
 - REST contract: `openapi/shield-api.yaml`
 - Quickstart: `docs/developers/quickstart.md`
 

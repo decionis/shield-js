@@ -21,13 +21,12 @@ enforcement point.
 
 ## First decision in five minutes
 
-ShieldKit 0.1.0 is public. The npm packages are tested release candidates but are
-not yet published because registry credentials are not available in this repository.
-Run the deterministic sandbox locally—no account, credentials, or real money required:
+ShieldKit and the npm packages are public. Run the deterministic sandbox locally—
+no account, credentials, or real money required:
 
 ```bash
-npm install
-npm run shield:demo:all
+npm install @decionis/shield
+npx @decionis/shield-demo --all
 ```
 
 Minimal TypeScript:
